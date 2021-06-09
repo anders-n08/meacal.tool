@@ -12,7 +12,7 @@ pub fn load(allocator: *std.mem.Allocator, prefix: []const u8) !?ConfigItem {
 
     var dir = try known.open(allocator, known.KnownFolder.home, .{});
     if (dir) |d| {
-        const fp = try d.openFile(".config/a00n08/meacal.config", .{});
+        const fp = try d.openFile(".config/meacal/meacal.config", .{});
 
         var buffer: [100]u8 = undefined;
         try fp.seekTo(0);
