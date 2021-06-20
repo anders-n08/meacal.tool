@@ -11,19 +11,27 @@ pub fn build(b: *std.build.Builder) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
-    const exe = b.addExecutable("meacal.tool", "src/main.zig");
-    exe.addIncludeDir("external/known-folders");
-
-    exe.addPackage(.{
+    const meacal_exe = b.addExecutable("meacal.tool", "src/main.zig");
+    meacal_exe.addIncludeDir("external/known-folders");
+    meacal_exe.addPackage(.{
         .name = "known-folders",
         .path = "libs/known-folders/known-folders.zig",
     });
+    meacal_exe.setTarget(target);
+    meacal_exe.setBuildMode(mode);
+    meacal_exe.install();
 
-    exe.setTarget(target);
-    exe.setBuildMode(mode);
-    exe.install();
+    const d100_exe = b.addExecutable("d100.tool", "src/d100.zig");
+    d100_exe.addIncludeDir("external/known-folders");
+    d100_exe.addPackage(.{
+        .name = "known-folders",
+        .path = "libs/known-folders/known-folders.zig",
+    });
+    d100_exe.setTarget(target);
+    d100_exe.setBuildMode(mode);
+    d100_exe.install();
 
-    const run_cmd = exe.run();
+    const run_cmd = meacal_exe.run();
     run_cmd.step.dependOn(b.getInstallStep());
     if (b.args) |args| {
         run_cmd.addArgs(args);

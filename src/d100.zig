@@ -39,9 +39,11 @@ pub fn main() anyerror!void {
         var month = try lexer.parseInt(t2);
         var day = try lexer.parseInt(t4);
 
-        var meacal_date = meacal.toMeaCal(config_item.year, year, month, day);
-
-        std.debug.print("{s}{:0>2}{c}{:0>2}\n", .{ config_item.prefix, meacal_date.year, meacal_date.month, meacal_date.day });
+        var offset: u64 = 0;
+        while (offset < 100) : (offset += 1) {
+            var meacal_date = meacal.toMeaCalWithOffset(config_item.year, year, month, day, offset);
+            std.debug.print("## {s}{:0>2}{c}{:0>2} - R01D{:0>2}\n", .{ config_item.prefix, meacal_date.year, meacal_date.month, meacal_date.day, offset });
+        }
     } else {
         std.debug.print("unable to load configuration\n", .{});
         return;
