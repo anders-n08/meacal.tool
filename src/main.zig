@@ -1,18 +1,19 @@
 const std = @import("std");
+const stdout = std.io.getStdOut().writer();
+
 const lx = @import("lexer.zig");
 const config = @import("config.zig");
-
 const meacal = @import("meacal.zig");
 
-pub fn main() anyerror!void {
+pub fn main() anyerror!u8 {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     const allocator = &arena.allocator;
     const args = try std.process.argsAlloc(allocator);
     defer std.process.argsFree(allocator, args);
 
     if (args.len != 3) {
-        std.debug.print("usage: {s} prefix date\n", .{args[0]});
-        return;
+        try stdout.print("usage: {s} prefix date\n", .{args[0]});
+        return 0;
     }
 
     if (try config.load(allocator, args[1])) |config_item| {
@@ -31,8 +32,8 @@ pub fn main() anyerror!void {
             t3.type_of != lx.TokenTypeOf.dash or
             t4.type_of != lx.TokenTypeOf.number)
         {
-            std.debug.print("incorrect date {s}\n", .{args[1]});
-            return;
+            try stdout.print("incorrect date {s}\n", .{args[1]});
+            return 0;
         }
 
         var year = try lexer.parseInt(t0);
@@ -41,9 +42,11 @@ pub fn main() anyerror!void {
 
         var meacal_date = meacal.toMeaCal(config_item.year, year, month, day);
 
-        std.debug.print("{s}{:0>2}{c}{:0>2}\n", .{ config_item.prefix, meacal_date.year, meacal_date.month, meacal_date.day });
+        try stdout.print("{s}{:0>2}{c}{:0>2}\n", .{ config_item.prefix, meacal_date.year, meacal_date.month, meacal_date.day });
     } else {
-        std.debug.print("unable to load configuration\n", .{});
-        return;
+        try stdout.print("unable to load configuration\n", .{});
+        return 0;
     }
+
+    return 0;
 }
