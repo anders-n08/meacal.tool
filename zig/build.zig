@@ -15,8 +15,9 @@ pub fn build(b: *std.build.Builder) void {
     meacal_exe.addIncludeDir("external/known-folders");
     meacal_exe.addPackage(.{
         .name = "known-folders",
-        .path = "libs/known-folders/known-folders.zig",
+        .path = .{ .path = "libs/known-folders/known-folders.zig" },
     });
+
     meacal_exe.setTarget(target);
     meacal_exe.setBuildMode(mode);
     meacal_exe.install();
@@ -25,7 +26,7 @@ pub fn build(b: *std.build.Builder) void {
     d100_exe.addIncludeDir("external/known-folders");
     d100_exe.addPackage(.{
         .name = "known-folders",
-        .path = "libs/known-folders/known-folders.zig",
+        .path = .{ .path = "libs/known-folders/known-folders.zig" },
     });
     d100_exe.setTarget(target);
     d100_exe.setBuildMode(mode);
