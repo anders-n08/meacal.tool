@@ -118,8 +118,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     if args.len() != 3 {
-        println!("usage: {} prefix date", args[0]);
-        return ();
+        panic!("usage: {} prefix date", args[0]);
     }
 
     let configuration = Configuration::load(&args[1]);
