@@ -1,3 +1,4 @@
+use regex::Regex;
 use std::char;
 use std::env;
 use std::fs::File;
@@ -69,62 +70,47 @@ impl MeaCalDate {
 }
 
 #[derive(Debug)]
-struct ConfigItem {
+struct Configuration {
     name: String,
     prefix: String,
     year: u32,
 }
 
-impl ConfigItem {
-    fn create(name: &str, cfs: &str) -> Option<ConfigItem> {
-        // fixme: A bit of a mess with Option, unwrap etc etc.
+impl Configuration {
+    fn load(name: &str) -> Option<Configuration> {
+        let mut config_fp = dirs::home_dir().unwrap();
+        config_fp.push(".config/meacal/meacal.config");
 
-        let mut prefix: Option<&str> = None;
-        let mut year: Option<u32> = None;
-        let config_items: Vec<&str> = cfs.split("|").collect();
-        for config_item in config_items {
-            let v0: Vec<&str> = config_item.split(":").collect();
-            if v0.len() != 2 {
-                panic!("Invalid configuration item");
-            }
+        let file = File::open(config_fp).unwrap();
+        let config_lines = io::BufReader::new(file).lines();
 
-            match v0[0] {
-                "prefix" => prefix = Some(v0[1]),
-                "year" => year = Some(v0[1].parse::<u32>().unwrap()),
-                _ => panic!("Unknown config item {}", v0[0]),
-            }
-        }
+        for line in config_lines {
+            if let Ok(ip) = line {
+                let re = Regex::new(r"([a-zA-Z0-9]*)!prefix:([a-zA-Z])\|year:([0-9]{4})").unwrap();
+                let configuration = re.captures(&ip).and_then(|cap| {
+                    Some(Configuration {
+                        name: cap
+                            .get(1)
+                            .map_or("".to_string(), |m| m.as_str().to_string()),
+                        prefix: cap
+                            .get(2)
+                            .map_or("".to_string(), |m| m.as_str().to_string()),
+                        year: cap
+                            .get(3)
+                            .map_or(2000, |m| m.as_str().parse::<u32>().unwrap()),
+                    })
+                });
 
-        return Some(ConfigItem {
-            name: name.to_string(),
-            prefix: prefix?.to_string(),
-            year: year?,
-        });
-    }
-}
-
-fn load_configuration(name: &str) -> Option<ConfigItem> {
-    let mut config_fp = dirs::home_dir().unwrap();
-    config_fp.push(".config/meacal/meacal.config");
-
-    let file = File::open(config_fp).unwrap();
-    let config_lines = io::BufReader::new(file).lines();
-
-    for line in config_lines {
-        if let Ok(ip) = line {
-            let mut split = ip.split("!");
-            let config_name = split.next();
-            let config_str = split.next();
-            match config_name {
-                Some(n) if n == name => {
-                    return ConfigItem::create(n, config_str?);
+                if let Some(ref c) = configuration {
+                    if name == c.name {
+                        return configuration;
+                    }
                 }
-                _ => {}
             }
         }
-    }
 
-    None
+        None
+    }
 }
 
 fn main() {
@@ -135,9 +121,8 @@ fn main() {
         return ();
     }
 
-    let config_item = load_configuration(&args[1]);
-    if let Some(cf) = config_item {
-        println!("{:?}", cf);
+    let configuration = Configuration::load(&args[1]);
+    if let Some(cf) = configuration {
         let date_items: Vec<&str> = args[2].split("-").collect();
         if date_items.len() != 3 {
             panic!("invalid date format");
