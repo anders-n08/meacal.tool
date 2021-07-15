@@ -88,6 +88,7 @@ impl Configuration {
             if let Ok(ip) = line {
                 let re = Regex::new(r"([a-zA-Z0-9]*)!prefix:([a-zA-Z])\|year:([0-9]{4})").unwrap();
                 let configuration = re.captures(&ip).and_then(|cap| {
+                    // todo: Is Option return type mandatory?
                     Some(Configuration {
                         name: cap
                             .get(1)
