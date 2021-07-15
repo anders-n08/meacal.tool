@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub const TokenTypeOf = enum { number, string, dash, pipe, colon, unknown, end_of_text };
+pub const TokenTypeOf = enum { number, string, dash, pipe, colon, exclamation_mark, unknown, end_of_text };
 
 pub const Lexer = struct {
     index: u64 = 0,
@@ -41,6 +41,8 @@ pub const Lexer = struct {
                 char_token_type_of = TokenTypeOf.colon;
             } else if (self.text[self.index] == '|') {
                 char_token_type_of = TokenTypeOf.pipe;
+            } else if (self.text[self.index] == '!') {
+                char_token_type_of = TokenTypeOf.exclamation_mark;
             } else {
                 char_token_type_of = TokenTypeOf.unknown;
             }
@@ -51,6 +53,7 @@ pub const Lexer = struct {
 
             if ((token.type_of == TokenTypeOf.dash) or
                 (token.type_of == TokenTypeOf.colon) or
+                (token.type_of == TokenTypeOf.exclamation_mark) or
                 (token.type_of == TokenTypeOf.pipe))
             {
                 // Triggers on the character and not on change.

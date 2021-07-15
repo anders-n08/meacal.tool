@@ -31,7 +31,7 @@ pub fn load(allocator: *std.mem.Allocator, prefix: []const u8) !?ConfigItem {
                 const t8 = lexer.nextToken();
 
                 if (t0.type_of != lx.TokenTypeOf.string or
-                    t1.type_of != lx.TokenTypeOf.colon or
+                    t1.type_of != lx.TokenTypeOf.exclamation_mark or
                     t2.type_of != lx.TokenTypeOf.string or
                     t3.type_of != lx.TokenTypeOf.colon or
                     t4.type_of != lx.TokenTypeOf.string or
