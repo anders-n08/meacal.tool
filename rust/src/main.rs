@@ -84,28 +84,25 @@ impl Configuration {
         let file = File::open(config_fp).unwrap();
         let config_lines = io::BufReader::new(file).lines();
 
-        for line in config_lines {
-            if let Ok(ip) = line {
-                let re = Regex::new(r"([a-zA-Z0-9]*)!prefix:([a-zA-Z])\|year:([0-9]{4})").unwrap();
-                let configuration = re.captures(&ip).and_then(|cap| {
+        for maybe_line in config_lines {
+            if let Ok(line) = maybe_line {
+                let re =
+                    Regex::new(&format!("{}!prefix:([a-zA-Z])\\|year:([0-9]{{4}})", name)).unwrap();
+                let configuration = re.captures(&line).and_then(|cap| {
                     // todo: Is Option return type mandatory?
                     Some(Configuration {
-                        name: cap
+                        name: name.to_string(),
+                        prefix: cap
                             .get(1)
                             .map_or("".to_string(), |m| m.as_str().to_string()),
-                        prefix: cap
-                            .get(2)
-                            .map_or("".to_string(), |m| m.as_str().to_string()),
                         year: cap
-                            .get(3)
+                            .get(2)
                             .map_or(2000, |m| m.as_str().parse::<u32>().unwrap()),
                     })
                 });
 
-                if let Some(ref c) = configuration {
-                    if name == c.name {
-                        return configuration;
-                    }
+                if !configuration.is_none() {
+                    return configuration;
                 }
             }
         }
