@@ -131,7 +131,7 @@ fn main() {
             MeaCalDate::to_mea_cal_with_offset(cf.year, year, month, day, 0).unwrap();
 
         println!(
-            "{}{}{}{}",
+            "{}{:02}{}{:02}",
             cf.prefix, mea_cal_date.year, mea_cal_date.month, mea_cal_date.day
         );
     } else {
