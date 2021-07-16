@@ -123,14 +123,12 @@ fn main() {
 
     let configuration = Configuration::load(&args[1]);
     if let Some(cf) = configuration {
-        let date_items: Vec<&str> = args[2].split("-").collect();
-        if date_items.len() != 3 {
-            panic!("invalid date format");
-        }
+        let re = Regex::new(r"([0-9]{4})-([0-9]{2})-([0-9]{2})").unwrap();
+        let cap = re.captures(&args[2]).unwrap();
 
-        let year = date_items[0].parse::<u32>().unwrap();
-        let month = date_items[1].parse::<u32>().unwrap();
-        let day = date_items[2].parse::<u32>().unwrap();
+        let year = cap[1].parse::<u32>().unwrap();
+        let month = cap[2].parse::<u32>().unwrap();
+        let day = cap[3].parse::<u32>().unwrap();
 
         let mea_cal_date =
             MeaCalDate::to_mea_cal_with_offset(cf.year, year, month, day, 0).unwrap();
