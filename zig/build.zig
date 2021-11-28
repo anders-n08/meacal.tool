@@ -11,28 +11,16 @@ pub fn build(b: *std.build.Builder) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
-    const meacal_exe = b.addExecutable("meacal.tool", "src/main.zig");
-    meacal_exe.addIncludeDir("external/known-folders");
-    meacal_exe.addPackage(.{
+    const exe = b.addExecutable("meacal.tool", "src/main.zig");
+    exe.addPackage(.{
         .name = "known-folders",
         .path = .{ .path = "libs/known-folders/known-folders.zig" },
     });
+    exe.setTarget(target);
+    exe.setBuildMode(mode);
+    exe.install();
 
-    meacal_exe.setTarget(target);
-    meacal_exe.setBuildMode(mode);
-    meacal_exe.install();
-
-    const d100_exe = b.addExecutable("d100.tool", "src/d100.zig");
-    d100_exe.addIncludeDir("external/known-folders");
-    d100_exe.addPackage(.{
-        .name = "known-folders",
-        .path = .{ .path = "libs/known-folders/known-folders.zig" },
-    });
-    d100_exe.setTarget(target);
-    d100_exe.setBuildMode(mode);
-    d100_exe.install();
-
-    const run_cmd = meacal_exe.run();
+    const run_cmd = exe.run();
     run_cmd.step.dependOn(b.getInstallStep());
     if (b.args) |args| {
         run_cmd.addArgs(args);
@@ -40,4 +28,10 @@ pub fn build(b: *std.build.Builder) void {
 
     const run_step = b.step("run", "Run the app");
     run_step.dependOn(&run_cmd.step);
+
+    var exe_tests = b.addTest("src/main.zig");
+    exe_tests.setBuildMode(mode);
+
+    const test_step = b.step("test", "Run unit tests");
+    test_step.dependOn(&exe_tests.step);
 }
